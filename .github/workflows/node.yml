@@ -15,9 +15,9 @@ jobs:
         with:
           node-version: "20"
 
-      - run: npm install
-
       - name: Grant execute permissions to npm-run-all
         run: chmod +x node_modules/.bin/npm-run-all
+
+      - run: npm install
 
       - run: npm run build --prefix client
