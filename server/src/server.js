@@ -1,25 +1,29 @@
 const http = require('http');
 const app = require('./app');
-const {loadPlanetsData} = require('./models/planets.model');
-const mongoose = require('mongoose');
 
+// Load planet data into the local database
+const {loadPlanetsData} = require('./models/planets.model');
+
+// Connect to the MongoDB database
+const {mongoConnect} = require('./services/mongo');
+
+// Load launch data into the local database
+const {loadLaunchData} = require('./models/launches.model');
+
+// Load environment variables from .env file
+require('dotenv').config;
+
+// Set the port for the server
 const PORT = process.env.PORT || 8000;
 
-const MONGO_URL = 'mongodb+srv://ernestoserna94:TVfTvooV5pmp8r8I@nasa.axwr7wc.mongodb.net/nasa?retryWrites=true&w=majority'
-
+// Create the server
 const server = http.createServer(app);
 
-mongoose.connection.once('open', () => {
-console.log('MongoDB connection ready');
-});
-
-mongoose.connection.on('error', (error) => {
-console.error(error)
-});
-
+// Start the server
 async function startServer() {
-    await mongoose.connect(MONGO_URL);
+    await mongoConnect();
     await loadPlanetsData();
+    await loadLaunchData();
     server.listen(PORT, () => {
         console.log(`Listening on ${PORT}`);
     });

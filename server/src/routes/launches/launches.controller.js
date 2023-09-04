@@ -1,10 +1,13 @@
-const {getAllLaunches, addNewLaunch, existLaunchWidthId, abortLaunchById} = require('../../models/launches.model');
+const {getAllLaunches, existLaunchWidthId, abortLaunchById, scheduleNewLaunch} = require('../../models/launches.model');
+const {getPagination} = require('../../services/query');
 
-function httpGetAllLaunches(req, res) {
-    return res.status(200).json(getAllLaunches());
+async function httpGetAllLaunches(req, res) {
+    const {skip, limit} = getPagination(req.query);
+    const launches = await getAllLaunches(skip, limit)
+    return res.status(200).json(launches);
 };
 
-function httpAddNewLaunch(req, res) {
+async function httpAddNewLaunch(req, res) {
     const newLaunch = req.body;
     if (!newLaunch.mission || !newLaunch.launchDate || !newLaunch.rocket || !newLaunch.target) {
         return res.status(400).json({ error: 'Missing required data' });
@@ -14,18 +17,20 @@ function httpAddNewLaunch(req, res) {
         return res.status(400).json({ error: 'Invalid launch date' });
     }
 
-    addNewLaunch(newLaunch);
+    await scheduleNewLaunch(newLaunch);
     return res.status(201).json(newLaunch);
 }
 
-function httpAbortLaunch(req, res) {
+async function httpAbortLaunch(req, res) {
     const launchId = +req.params.id;
-    if(!existLaunchWidthId(launchId)) {
+
+    const existLaunch = await existLaunchWidthId(launchId);
+    if(!existLaunch) {
         return res.status(404).json({
             error: 'Launch not found'
         });
     }
-    const aborted = abortLaunchById(launchId);
+    const aborted = await abortLaunchById(launchId);
     return res.status(200).json(aborted);
 }
 
