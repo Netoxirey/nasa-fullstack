@@ -8,9 +8,11 @@ jobs:
   build:
     env:
       CI: true
+      MONGO_URL: mongodb://localhost:nasatest
     strategy:
       matrix:
         node-version: [14.x, 16.x, 18.x, 20.x]
+        mongodb-version: ["4.4"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,10 +20,15 @@ jobs:
       - name: Use Node.js version ${{matrix.node-version}}
         uses: actions/setup-node@v3
         with:
-          node-version: ${{matrix.node-version}}
+          node-version: ${{ matrix.node-version }}
 
       - name: Grant execute permissions to npm-run-all
         run: chmod +x node_modules/.bin/npm-run-all
+
+      - name: Use mongo db for github actions
+        uses: supercharge/mongodb-github-action@v1.10.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
 
       - run: npm install
 
