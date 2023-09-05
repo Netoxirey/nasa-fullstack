@@ -10,7 +10,7 @@ describe('Launches api', () => {
     });
     
     afterAll(async() => {
-        await mongoDisconnect();
+        setTimeout(() => {mongoDisconnect()}, 1500)
     });
     
     describe('Test GET /launches', () => {
